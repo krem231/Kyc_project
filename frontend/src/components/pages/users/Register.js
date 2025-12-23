@@ -23,7 +23,7 @@ function Register() {
 
   const onSubmit = async (data) => {
     try {
-      await axios.post('http://localhost:5000/register', data);
+      await axios.post('http://localhost:5000/api/register', data);
       console.log('Đăng ký thành công - Redirecting...'); // Debug
       navigate('/login');
     } catch (err) {

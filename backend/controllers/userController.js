@@ -1,13 +1,7 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const Joi = require('joi');
-//const User = require('./User'); // Import User từ db.js
-const User = require('./models/User');
+const { registerUser, loginUser } = require('../services/userService');
 
-const router = express.Router();
-
-// Validation schemas
+// Validation schemas 
 const registerSchema = Joi.object({
   username: Joi.string().min(3).max(30).required(),
   password: Joi.string().min(6).required(),
@@ -27,42 +21,37 @@ const loginSchema = Joi.object({
   password: Joi.string().required()
 });
 
-// Route Đăng ký
-router.post('/register', async (req, res) => {
+// đăng ký
+async function register(req, res) {
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).send('Yêu cầu phải có dữ liệu body JSON');
   }
   const { error } = registerSchema.validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const { username, password, email, phone, idCard, dob } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const newUser = new User({ username, password: hashedPassword, email, phone, idCard, dob, role: 'user' });
   try {
-    await newUser.save();
-    res.status(201).send('User registered successfully');
+    const message = await registerUser(req.body);
+    res.status(201).send(message);
   } catch (err) {
     if (err.code === 11000) return res.status(400).send('Username, email hoặc CCCD đã tồn tại');
     res.status(400).send('Error: ' + err.message);
   }
-});
+}
 
-// Route Đăng nhập
-router.post('/login', async (req, res) => {
+// đăng nhập
+async function login(req, res) {
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).send('Yêu cầu phải có dữ liệu body JSON');
   }
   const { error } = loginSchema.validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    return res.status(400).send('Invalid credentials');
+  try {
+    const result = await loginUser(req.body.username, req.body.password);
+    res.json(result);
+  } catch (err) {
+    res.status(400).send(err.message);
   }
-  const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, 'secretkey', { expiresIn: '1h' });
-  res.json({ token, username: user.username, role: user.role });
-});
+}
 
-module.exports = router;
+module.exports = { register, login };
