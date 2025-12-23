@@ -1,10 +1,10 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Register from './components/Register';
-import Login from './components/Login';
+import Register from './components/pages/users/Register';
+import Login from './components/pages/users/Login';
 import Welcome from './components/Welcome';
-import Choose from './components/Choose';
-import Admin from './components/Admin';
+import Choose from './components/pages/admin/Choose';
+import Admin from './components/pages/admin/Admin';
 import './App.css';
 
 function App() {
