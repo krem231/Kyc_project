@@ -5,6 +5,7 @@ import Login from './components/pages/users/Login';
 import Welcome from './components/Welcome';
 import Choose from './components/pages/admin/Choose';
 import Admin from './components/pages/admin/Admin';
+import LinkBank from './components/pages/users/LinkBank';
 import './App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
       <Route path="/choose" element={<Choose />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="/" element={<Login />} />
+      <Route path="/link-bank" element={<LinkBank />} />
     </Routes>
   );
 }

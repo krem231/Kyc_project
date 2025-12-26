@@ -1,7 +1,8 @@
+// controllers/userController.js (cập nhật với error handling tốt hơn)
 const Joi = require('joi');
 const { registerUser, loginUser } = require('../services/userService');
 
-// Validation schemas 
+// Validation schemas
 const registerSchema = Joi.object({
   username: Joi.string().min(3).max(30).required(),
   password: Joi.string().min(6).required(),
@@ -26,6 +27,7 @@ async function register(req, res) {
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).send('Yêu cầu phải có dữ liệu body JSON');
   }
+
   const { error } = registerSchema.validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -33,8 +35,14 @@ async function register(req, res) {
     const message = await registerUser(req.body);
     res.status(201).send(message);
   } catch (err) {
-    if (err.code === 11000) return res.status(400).send('Username, email hoặc CCCD đã tồn tại');
-    res.status(400).send('Error: ' + err.message);
+    console.error('Register error:', err); // Log lỗi để debug
+    if (err.name === 'MongoServerError' && err.code === 11000) {
+      const field = Object.keys(err.keyPattern)[0]; // Lấy field gây duplicate
+      return res.status(400).send(`${field.charAt(0).toUpperCase() + field.slice(1)} đã tồn tại`);
+    } else if (err.name === 'ValidationError') {
+      return res.status(400).send(Object.values(err.errors).map(e => e.message).join(', '));
+    }
+    res.status(500).send('Lỗi server: ' + err.message);
   }
 }
 
@@ -43,6 +51,7 @@ async function login(req, res) {
   if (!req.body || Object.keys(req.body).length === 0) {
     return res.status(400).send('Yêu cầu phải có dữ liệu body JSON');
   }
+
   const { error } = loginSchema.validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
