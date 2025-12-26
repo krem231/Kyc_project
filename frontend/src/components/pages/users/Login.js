@@ -20,6 +20,7 @@ function Login() {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('username', res.data.username);
       localStorage.setItem('role', res.data.role);
+       localStorage.setItem('userId', res.data.id);
       if (res.data.role === 'admin') {
         navigate('/choose'); // Sang trang chọn cho admin
       } else {
