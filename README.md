@@ -15,4 +15,7 @@ fe
 - Tất cả routes fe nằm trong file App.js (trong frontend/src/)
 - components fe 
 + register.js form đăng ký vs validation yup gọi API POST /register, redirect /login nếu thành công
-- css nằm trong App.css 
+- css nằm trong App.css
+
+vì giới hạn dung lượng của github nên phần transaction sẽ được đính kèm
+link [https://drive.google.com/file/d/107lssRhxSEt7jZBwWnS3s5OmbHK5NZhj/view]
