@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   idCard: { type: String, required: true, unique: true },
   dob: { type: Date, required: true },
-  role: { type: String, enum: ['admin', 'user'], default: 'user' }
+  role: { type: String, enum: ['admin', 'user'], default: 'user' },
+  isBanned: { type: Boolean, default: false } 
 });
 
 const User = mongoose.model('User', userSchema);

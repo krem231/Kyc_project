@@ -1,4 +1,3 @@
-// src/components/Choose.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,9 +6,15 @@ function Choose() {
 
   return (
     <div className="container">
-      <h1>Chọn chế độ</h1>
-      <button onClick={() => navigate('/welcome')}>Vào trang thường</button>
-      <button onClick={() => navigate('/admin')}>Vào trang admin</button>
+      <h1>Chọn chức năng (Admin)</h1>
+      
+      <button onClick={() => navigate('/admin')}>Quản lý User</button>
+      <button onClick={() => navigate('/welcome')}>Trang thường</button>
+      
+      <button onClick={() => {
+        localStorage.clear();
+        navigate('/login');
+      }}>Đăng xuất</button>
     </div>
   );
 }

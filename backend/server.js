@@ -1,22 +1,38 @@
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
-const { connectDB } = require('./db'); // Import connectDB từ db.js
-const userRoutes = require('./routes/userRoutes'); // Import routes mới
+const { connectDB } = require('./db');
+const userRoutes = require('./routes/admin/user.route');
 
 const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 
 // Kết nối DB
 connectDB();
 
-// Attach routes với prefix '/api' để tạo API riêng (ví dụ: /api/register)
+// Routes
 app.use('/api', userRoutes);
 
-// Thêm log để chắc chắn routes được load
-console.log('Routes loaded:', userRoutes.stack.map(r => r.route).filter(Boolean));
+// Test route
+app.get('/', (req, res) => {
+  res.send('Backend is running!');
+});
+
+// Error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong!', error: err.message });
+});
 
 // Chạy server
-app.listen(5000, () => console.log('Server running on port 5000'));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
