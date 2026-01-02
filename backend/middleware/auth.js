@@ -1,24 +1,31 @@
+// middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
 
-module.exports = function auth(req, res, next) {
+const authMiddleware = (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      return res.status(401).json({ message: 'No token provided' });
-    }
-    const token = authHeader.split(' ')[1];
+    const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
-      return res.status(401).json({ message: 'Invalid token format' });
+      return res.status(401).json({ message: 'Vui lòng đăng nhập' });
     }
-    const decoded = jwt.verify(token, JWT_SECRET);
+
+    let decoded;
+
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+    } catch (e) {
+      decoded = jwt.verify(token, 'WALLET_SECRET_KEY');
+    }
+
     req.user = {
-      id: decoded.id,
+       id: decoded.id || decoded.userId,
       username: decoded.username,
       role: decoded.role
     };
+
     next();
   } catch (err) {
-    return res.status(401).json({ message: 'Token invalid or expired' });
+    return res.status(401).json({ message: 'Token không hợp lệ' });
   }
 };
+
+module.exports = authMiddleware;

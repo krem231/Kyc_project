@@ -1,0 +1,13 @@
+const axios = require('axios');
+
+const WEB3_SERVER = 'http://localhost:7000';
+
+exports.checkWeb3Health = async () => {
+  const res = await axios.get(`${WEB3_SERVER}/test`);
+  return res.data;
+};
+
+exports.getLatestBlock = async () => {
+  const res = await axios.get(`${WEB3_SERVER}/block/latest`);
+  return res.data.block;
+};

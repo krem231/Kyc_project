@@ -25,5 +25,4 @@ const wallet_schema=new mongoose.Schema({
   default: Date.now 
   },
 });
-const Wallet = mongoose.model("Wallet", wallet_schema);
-module.exports = Wallet
+module.exports = mongoose.models.Wallet || mongoose.model("Wallet", wallet_schema);

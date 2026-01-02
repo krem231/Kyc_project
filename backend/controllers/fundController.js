@@ -1,4 +1,5 @@
 const createFund = require('../services/create_fund');
+const Fund = require('../models/Fund');
 
 async function createFundController(req, res) {
   console.log('BODY:', req.body);
@@ -38,5 +39,37 @@ async function createFundController(req, res) {
     });
   }
 }
+async function getFundsController(req, res) {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        error: 'Chưa xác thực người dùng'
+      });
+    }
 
-module.exports = { createFundController };
+    const userId = req.user.id;
+
+    console.log('GET FUNDS - USER ID:', userId);
+
+    const funds = await Fund.find({
+      $or: [
+        { owner: userId },
+        { members: userId }
+      ]
+    }).sort({ create_at: -1 });
+
+    console.log('FUNDS FOUND:', funds.length);
+
+    return res.json({
+      success: true,
+      data: funds
+    });
+
+  } catch (err) {
+    console.error('GET FUNDS ERROR:', err);
+    return res.status(500).json({
+      error: 'Lỗi server'
+    });
+  }
+}
+module.exports = { createFundController,getFundsController };

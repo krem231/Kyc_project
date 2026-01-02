@@ -1,0 +1,227 @@
+/* =======================
+   DASHBOARD + COMMON UI
+   ======================= */
+
+.user-id-box {
+  background: #f5f5f5;
+  padding: 10px;
+  border-radius: 6px;
+  margin: 10px 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.user-id-code {
+  background: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.wallet-item {
+  border: 1px solid #ddd;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.wallet-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
+  color: red;
+}
+
+.wallet-time {
+  font-size: 12px;
+  color: #666;
+}
+
+.logout-btn {
+  background: red;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 350px;
+}
+
+.modal-input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+}
+
+/* =======================
+   OTP / DEPOSIT / WITHDRAW
+   ======================= */
+
+/* Overlay nền mờ */
+.otp-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Popup chính */
+.otp-popup {
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: slideUp 0.4s ease-out;
+  position: relative;
+}
+
+/* Nút đóng */
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #999;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* Header */
+.otp-header {
+  text-align: center;
+  padding: 24px 20px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.otp-icon-large {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.otp-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* Nội dung */
+.otp-content {
+  padding: 24px;
+}
+
+/* Thông tin */
+.request-info {
+  margin-bottom: 20px;
+}
+
+.request-info label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.request-info select,
+.request-info input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: border 0.3s;
+}
+
+.request-info select:focus,
+.request-info input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* OTP */
+.otp-code-section label {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.otp-code-input {
+  width: 100%;
+  padding: 16px;
+  font-size: 32px;
+  letter-spacing: 12px;
+  text-align: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.otp-code-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+}
+
+/* Button */
+.otp-content button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.otp-content button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(50px); }
+  to { opacity: 1; transform: translateY(0); }
+}

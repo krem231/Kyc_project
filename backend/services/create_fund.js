@@ -21,10 +21,10 @@ async function createFund({ ownerId, fundName, friendId }) {
   }
 
   const fund = await Fund.create({
-    owner: ownerId,                 // ✅ ĐÚNG TÊN FIELD
-    members: [ownerId, friendId],   // ✅ ĐÚNG TÊN FIELD
+    owner: ownerId,                 
+    members: [ownerId, friendId],   
     balance: 0,
-    name: fundName                  // (nếu schema có)
+    name: fundName                  
   });
 
   return fund;
