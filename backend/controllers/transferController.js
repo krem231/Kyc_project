@@ -99,17 +99,8 @@ const transferByPhone = async (req, res) => {
   }
 };
 
-/**
- * POST /api/wallet/check-receiver
- * Kiểm tra người nhận theo số điện thoại
- * FE gửi: { phone }
- */
 const checkReceiver = async (req, res) => {
   try {
-    console.log('🔥 CHECK RECEIVER API HIT');
-    console.log('BODY:', req.body);
-    console.log('USER:', req.user);
-
     const { phone } = req.body;
     const senderId = req.user?.id;
 
@@ -121,13 +112,6 @@ const checkReceiver = async (req, res) => {
     }
 
     const cleanPhone = normalizePhone(phone);
-
-    console.log('===== CHECK RECEIVER DEBUG =====');
-    console.log('Raw phone:', phone);
-    console.log('Clean phone:', cleanPhone);
-    console.log('Sender ID:', senderId);
-    console.log('================================');
-
     const receiver = await User.findOne({ phone: cleanPhone });
 
     if (!receiver) {
@@ -144,7 +128,6 @@ const checkReceiver = async (req, res) => {
       });
     }
 
-    // ✅ Lấy ví ACTIVE của người nhận
     const wallets = await Wallet.find({
       user_id: receiver._id,
       status: 'active'
@@ -167,7 +150,7 @@ const checkReceiver = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ CHECK RECEIVER ERROR:', error);
+    console.error( error);
     return res.status(500).json({
       success: false,
       message: 'Lỗi kiểm tra người nhận'

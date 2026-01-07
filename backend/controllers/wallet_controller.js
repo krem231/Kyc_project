@@ -15,32 +15,44 @@ async function getWallets(req, res) {
 }
 async function createWallet(req, res) {
   try {
-    const userData = {
-      _id: req.user.id
-    };
+    const userData = { _id: req.user.id };
+
     const wallet = await new_wallet(userData);
+
     res.status(201).json({
-      message: 'Wallet created successfully',
-      
+      message: 'Tạo ví thành công',
+      wallet
     });
+
   } catch (err) {
-    res.status(400).json({
-      error: err.message
+    res.status(err.statusCode || 400).json({
+      message: err.message || 'Không thể tạo ví'
     });
   }
 }
-async function deleteWallet(req, res){
-  try{
-    const userData={_id: req.user.id};
-    const wallet= await delete_wallet(userData);
-    res.status(201).json({
-      message: 'wallet delete!'
+async function deleteWallet(req, res) {
+  try {
+    const walletId = req.params.id;
+    const userId = req.user.id;
 
-    })
-  }catch(err){
-    res.status(400).json({
-      err: err.message
+    const wallet = await Wallet.findOneAndDelete({
+      _id: walletId,
+      user_id: userId
     });
+
+    if (!wallet) {
+      return res.status(404).json({
+        message: 'Ví không tồn tại hoặc không có quyền'
+      });
+    }
+
+    res.json({
+      message: 'Xoá ví thành công',
+      walletId: wallet._id
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 }
 

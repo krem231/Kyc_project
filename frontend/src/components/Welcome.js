@@ -49,8 +49,7 @@ const [isLoadingReceiverWallets, setIsLoadingReceiverWallets] = useState(false);
   useEffect(() => {
     if (!token) navigate('/login');
   }, [token, navigate]);
-  useEffect(() => {
-    const fetchWallets = async () => {
+  const fetchWallets = async () => {
       try {
         const res = await axios.get('http://localhost:5000/api/wallets', {
           headers: { Authorization: `Bearer ${token}` }
@@ -62,6 +61,8 @@ const [isLoadingReceiverWallets, setIsLoadingReceiverWallets] = useState(false);
         setLoading(false);
       }
     };
+    
+  useEffect(() => {
     fetchWallets();
   }, [token]);
   const handleCreateWallet = async () => {
@@ -75,6 +76,7 @@ const [isLoadingReceiverWallets, setIsLoadingReceiverWallets] = useState(false);
       if (res.data?.wallet) {
         setWallets(prev => [...prev, res.data.wallet]);
       }
+       await fetchWallets();
     } catch (err) {
       alert(
         err.response?.data?.message ||
@@ -83,10 +85,24 @@ const [isLoadingReceiverWallets, setIsLoadingReceiverWallets] = useState(false);
       );
     }
   };
-  const handleDeleteWallet = (walletId) => {
-    if (!window.confirm('Bạn có chắc muốn xoá ví này không?')) return;
+const handleDeleteWallet = async (walletId) => {
+  if (!window.confirm('Bạn có chắc muốn xoá ví này không?')) return;
+
+  try {
+    await axios.delete(
+      `http://localhost:5000/api/wallets/${walletId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // Chỉ update UI sau khi BE xoá thành công
     setWallets(prev => prev.filter(w => w._id !== walletId));
-  };
+
+  } catch (err) {
+    console.error('DELETE WALLET ERROR:', err.response || err);
+    alert(err.response?.data?.message || 'Không thể xoá ví');
+  }
+};
+
   const handleCreateFund = async () => {
     if (!fundName || !friendId) {
       alert('Vui lòng nhập đầy đủ thông tin');

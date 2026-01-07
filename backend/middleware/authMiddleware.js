@@ -1,5 +1,20 @@
-// middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
+
+const JWT_SECRETS = [
+  'WALLET_SECRET_KEY', // hệ mới (deploy)
+  'secretkey'          // hệ cũ (khung)
+];
+
+function verifyWithMultipleSecrets(token) {
+  for (const secret of JWT_SECRETS) {
+    try {
+      return jwt.verify(token, secret);
+    } catch (e) {
+      // thử secret tiếp theo
+    }
+  }
+  return null;
+}
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -12,14 +27,21 @@ const authMiddleware = async (req, res, next) => {
       });
     }
 
-    const JWT_SECRET = 'WALLET_SECRET_KEY'; // Secret riêng cho ví
-    const decoded = jwt.verify(token, JWT_SECRET);
-    
-  req.user = {
-    id: decoded.id,        // Sửa: dùng decoded.id (khớp với payload)
-    username: decoded.username,  // Thêm nếu cần
-    role: decoded.role
-  };
+    const decoded = verifyWithMultipleSecrets(token);
+
+    if (!decoded) {
+      console.error('Lỗi verify token: invalid signature');
+      return res.status(401).json({
+        success: false,
+        message: 'Token không hợp lệ'
+      });
+    }
+
+    req.user = {
+      id: decoded.id,
+      username: decoded.username,
+      role: decoded.role
+    };
 
     next();
   } catch (error) {
