@@ -1,5 +1,16 @@
-import React from 'react';
-import { Routes, Route, useLocation} from 'react-router-dom';
+// src/App.js
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { useSocketContext } from './socket/SocketContext';
+import './App.css';
+
+// Components
+import NotificationBell from './components/NotificationBell';
+import NotificationList from './components/NotificationList';
+import NotificationToast from './components/NotificationToast';
+import ChatWidget from './components/ChatWidget';
+
+// Pages
 import Register from './components/pages/users/Register';
 import Login from './components/pages/users/Login';
 import Welcome from './components/Welcome';
@@ -9,35 +20,120 @@ import Saving from './components/pages/users/Saving';
 import FundList from './components/pages/users/fundList';
 import Admin from './components/pages/admin/Admin';
 import TransactionHistory from './components/pages/users/TransactionHistory';
-import ChatWidget from './components/ChatWidget';
-import './App.css';
-
 
 function App() {
-
-const location = useLocation();
-  const currentPath = location.pathname;
+  console.log('🔄 [App] Component rendering...');
   
-    // ChatWidget hiện ở mọi trang trừ login, register, choose, admin
-  const showChat = !['/login', '/register', '/choose', '/admin', '/'].includes(currentPath);
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  // Get socket context
+  const { isConnected, notifications, balance } = useSocketContext();
+  
+  console.log('📊 [App] Socket connected:', isConnected);
+  console.log('📊 [App] Notifications count:', notifications.length);
+  console.log('📊 [App] Balance:', balance);
+  
+  // Local states
+  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
+  const [toastNotification, setToastNotification] = useState(null);
+
+  // ✨ Watch notifications changes
+  useEffect(() => {
+    console.log('\n═══════════════════════════════════════');
+    console.log('🎯 [App useEffect] Triggered!');
+    console.log('Notifications array:', notifications);
+    console.log('Notifications length:', notifications.length);
+    console.log('═══════════════════════════════════════\n');
+    
+    if (notifications.length > 0) {
+      const latest = notifications[0];
+      console.log('✅ [App] Setting toast with latest notification:', latest);
+      
+      setToastNotification(latest);
+      
+      // Auto-hide after 6 seconds
+      const timer = setTimeout(() => {
+        console.log('⏰ [App] Auto-hiding toast');
+        setToastNotification(null);
+      }, 6000);
+      
+      return () => {
+        console.log('🧹 [App] Clearing auto-hide timer');
+        clearTimeout(timer);
+      };
+    }
+  }, [notifications]);
+
+  // Layout logic
+  const publicPaths = ['/login', '/register', '/choose', '/admin', '/'];
+  const showMainLayout = !publicPaths.includes(currentPath);
+
+  console.log('🔍 [App] Current toast notification:', toastNotification);
+  console.log('🔍 [App] Should show toast:', !!toastNotification);
 
   return (
-    <>
-    <Routes>
-      <Route path="/register" element={<Register />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/welcome" element={<Welcome />} />
-      <Route path="/choose" element={<Choose />} />
-      <Route path="/admin" element={<Admin />} />
-      <Route path="/link-bank" element={<LinkBank />} />
-      <Route path="/" element={<Login />} />
-      <Route path="/saving" element={<Saving />} />
-      <Route path="/funds" element={<FundList />} />
-<Route path="/history" element={<TransactionHistory />} />
+    <div className="app">
+      {/* Header */}
+      {showMainLayout && (
+        <header className="app-header">
+          <h1>My Wallet App</h1>
+          <div className="header-right">
+            <div className={`connection-status ${isConnected ? 'connected' : 'disconnected'}`}>
+              {isConnected ? '🟢 Online' : '🔴 Offline'}
+            </div>
 
-    </Routes>
-      {showChat && <ChatWidget />}
-    </>
+            {balance !== null && (
+              <div className="balance-display">
+                💰 {balance.toLocaleString('vi-VN')} VND
+              </div>
+            )}
+
+            <NotificationBell onOpen={() => setShowNotificationPanel(true)} />
+          </div>
+        </header>
+      )}
+
+      {/* Main Routes */}
+      <main className={showMainLayout ? 'app-content' : ''}>
+        <Routes>
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Login />} />
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/choose" element={<Choose />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/link-bank" element={<LinkBank />} />
+          <Route path="/saving" element={<Saving />} />
+          <Route path="/funds" element={<FundList />} />
+          <Route path="/history" element={<TransactionHistory />} />
+        </Routes>
+      </main>
+
+      {/* Overlays */}
+      {showMainLayout && <ChatWidget />}
+      
+      <NotificationList
+        isOpen={showNotificationPanel}
+        onClose={() => setShowNotificationPanel(false)}
+      />
+      
+      {/* TOAST - ALWAYS RENDER OUTSIDE LAYOUT CHECK */}
+      {toastNotification ? (
+        <>
+          {console.log('🍞 [App] Rendering NotificationToast component')}
+          <NotificationToast
+            notification={toastNotification}
+            onClose={() => {
+              console.log('❌ [App] Toast closed by user');
+              setToastNotification(null);
+            }}
+          />
+        </>
+      ) : (
+        console.log('⚠️ [App] No toast to render')
+      )}
+    </div>
   );
 }
 

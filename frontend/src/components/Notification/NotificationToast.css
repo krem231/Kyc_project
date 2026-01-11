@@ -1,0 +1,83 @@
+/* src/components/NotificationToast.css */
+.notification-toast {
+  position: fixed !important;
+  top: 80px !important;
+  right: 20px !important;
+  background: white !important;
+  border: 2px solid #007bff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+  padding: 20px !important;
+  display: flex !important;
+  gap: 15px !important;
+  min-width: 320px !important;
+  max-width: 420px !important;
+  z-index: 999999 !important; /* ← CỰC KỲ CAO */
+  animation: slideInRight 0.4s ease-out !important;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(150%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast-icon {
+  font-size: 36px !important;
+  flex-shrink: 0;
+}
+
+.toast-content {
+  flex: 1;
+}
+
+.toast-content h4 {
+  margin: 0 0 6px 0 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+}
+
+.toast-content p {
+  margin: 0 0 10px 0 !important;
+  font-size: 14px !important;
+}
+
+.toast-amount {
+  display: inline-block !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+}
+
+.toast-amount.positive {
+  background: #d4edda !important;
+  color: #28a745 !important;
+}
+
+.toast-amount.negative {
+  background: #f8d7da !important;
+  color: #dc3545 !important;
+}
+
+.toast-close {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  background: #f0f0f0 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  cursor: pointer !important;
+  font-size: 18px !important;
+}
+
+.toast-close:hover {
+  background: #e0e0e0 !important;
+}

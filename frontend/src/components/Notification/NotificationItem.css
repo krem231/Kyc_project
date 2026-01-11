@@ -1,0 +1,57 @@
+/* src/components/NotificationItem.css */
+.notification-item {
+  display: flex;
+  gap: 12px;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s;
+}
+
+.notification-item:hover {
+  background: #f9f9f9;
+}
+
+.notification-item.unread {
+  background: #f0f8ff;
+}
+
+.notif-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.notif-content {
+  flex: 1;
+}
+
+.notif-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.notif-content p {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.notif-amount {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-right: 10px;
+}
+
+.notif-amount.positive {
+  color: #28a745;
+}
+
+.notif-amount.negative {
+  color: #dc3545;
+}
+
+.notif-time {
+  font-size: 12px;
+  color: #999;
+}

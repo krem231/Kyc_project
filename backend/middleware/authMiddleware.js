@@ -1,24 +1,23 @@
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRETS = [
-  'WALLET_SECRET_KEY', // hệ mới (deploy)
-  'secretkey'          // hệ cũ (khung)
+  'WALLET_SECRET_KEY',
+  'secretkey'
 ];
 
 function verifyWithMultipleSecrets(token) {
   for (const secret of JWT_SECRETS) {
     try {
       return jwt.verify(token, secret);
-    } catch (e) {
-      // thử secret tiếp theo
-    }
+    } catch (e) {}
   }
   return null;
 }
 
-const authMiddleware = async (req, res, next) => {
+module.exports = function authMiddleware(req, res, next) {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.replace('Bearer ', '');
 
     if (!token) {
       return res.status(401).json({
@@ -30,7 +29,6 @@ const authMiddleware = async (req, res, next) => {
     const decoded = verifyWithMultipleSecrets(token);
 
     if (!decoded) {
-      console.error('Lỗi verify token: invalid signature');
       return res.status(401).json({
         success: false,
         message: 'Token không hợp lệ'
@@ -38,19 +36,16 @@ const authMiddleware = async (req, res, next) => {
     }
 
     req.user = {
-      id: decoded.id,
+      id: decoded.id || decoded.userId,
       username: decoded.username,
       role: decoded.role
     };
 
     next();
-  } catch (error) {
-    console.error('Lỗi verify token:', error.message);
+  } catch (err) {
     return res.status(401).json({
       success: false,
       message: 'Token không hợp lệ'
     });
   }
 };
-
-module.exports = authMiddleware;

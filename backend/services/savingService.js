@@ -1,11 +1,11 @@
+// services/savingService.js
 const Wallet = require('../models/Wallet');
 const SavingTransaction = require('../models/SavingTransaction');
+const { createNotification } = require('./notificationService');
+const { getIO } = require('../socket');
 
 const INTEREST_RATE = 0.02;
 
-/**
- * Gửi tiết kiệm
- */
 const createSaving = async ({ userId, walletId, amount, term }) => {
   amount = Number(amount);
   term = Number(term);
@@ -18,7 +18,6 @@ const createSaving = async ({ userId, walletId, amount, term }) => {
     throw new Error('Số tiền không hợp lệ');
   }
 
-  // 1️⃣ Tìm ví
   const wallet = await Wallet.findOne({
     _id: walletId,
     user_id: userId
@@ -28,7 +27,7 @@ const createSaving = async ({ userId, walletId, amount, term }) => {
     throw new Error('Ví không tồn tại');
   }
 
-  if (wallet.status !== 'activate') {
+  if (wallet.status !== 'active') {
     throw new Error('Ví không hoạt động');
   }
 
@@ -36,21 +35,15 @@ const createSaving = async ({ userId, walletId, amount, term }) => {
     throw new Error('Số dư không đủ');
   }
 
-  // 2️⃣ Tính lãi
   const interestAmount = Math.floor(amount * INTEREST_RATE);
   const totalReceive = amount + interestAmount;
 
-  // 3️⃣ Tính ngày đáo hạn
   const startDate = new Date();
   const endDate = new Date();
   endDate.setMonth(endDate.getMonth() + term);
 
-  // 4️⃣ Trừ tiền ví (atomic)
   const updatedWallet = await Wallet.findOneAndUpdate(
-    {
-      _id: walletId,
-      balance: { $gte: amount }
-    },
+    { _id: walletId, balance: { $gte: amount } },
     { $inc: { balance: -amount } },
     { new: true }
   );
@@ -59,7 +52,6 @@ const createSaving = async ({ userId, walletId, amount, term }) => {
     throw new Error('Không thể trừ tiền ví');
   }
 
-  // 5️⃣ Tạo sổ tiết kiệm
   const saving = await SavingTransaction.create({
     walletId,
     userId,
@@ -71,6 +63,40 @@ const createSaving = async ({ userId, walletId, amount, term }) => {
     startDate,
     endDate
   });
+
+  // GỬI THÔNG BÁO
+  try {
+    const notification = await createNotification({
+      userId: userId,
+      type: 'SAVINGS_DEPOSIT',
+      title: '🏦 Gửi tiết kiệm thành công',
+      message: `Bạn đã gửi ${amount.toLocaleString('vi-VN')} VND vào kỳ hạn ${term} tháng. Lãi suất ${(INTEREST_RATE * 100)}%/tháng`,
+      amount: -amount,
+      metadata: {
+        savingId: saving._id,
+        term: term,
+        interestRate: INTEREST_RATE,
+        interestAmount: interestAmount,
+        totalReceive: totalReceive,
+        endDate: endDate
+      }
+    });
+
+    const io = getIO();
+    io.to(userId.toString()).emit('new-notification', {
+      notification: notification,
+      balanceChange: -amount
+    });
+
+    io.to(userId.toString()).emit('balance-updated', {
+      walletId: walletId,
+      balance: updatedWallet.balance,
+      change: -amount
+    });
+
+  } catch (notifError) {
+    console.error('Error sending saving notification:', notifError);
+  }
 
   return {
     success: true,
@@ -88,6 +114,4 @@ const createSaving = async ({ userId, walletId, amount, term }) => {
   };
 };
 
-module.exports = {
-  createSaving
-};
+module.exports = { createSaving };

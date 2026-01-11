@@ -2,13 +2,14 @@ const socketIo = require('socket.io');
 const socketAuth = require('./authMiddleware');
 const { setupChatHandlers } = require('./chatSocket');
 
+// ✨ THÊM BIẾN NÀY
+let io = null;
+
 /**
  * Khởi tạo và cấu hình Socket.IO
- * @param {http.Server} server - HTTP server instance
- * @returns {SocketIO.Server} Socket.IO instance
  */
 function initializeSocket(server) {
-  const io = socketIo(server, {
+  io = socketIo(server, {  // ← Lưu vào biến io
     cors: {
       origin: process.env.CLIENT_URL || 'http://localhost:3000',
       methods: ['GET', 'POST'],
@@ -21,34 +22,29 @@ function initializeSocket(server) {
   // Apply authentication middleware
   io.use(socketAuth);
 
-  // Connection handler
   io.on('connection', (socket) => {
-    
-    // Join personal room (để nhận thông báo riêng)
+    // Join personal room
     const userId = socket.user._id.toString();
     socket.join(userId);
+    console.log(`📍 User ${socket.user.username} joined room: ${userId}`);
     
-    // Nếu là admin, join vào admin room
+    // Nếu là admin
     if (socket.user.role === 'admin') {
       socket.join('admins');
       console.log(`👨‍💼 Admin ${socket.user.username} joined admins room`);
     }
 
-    // Setup chat-related event handlers
     setupChatHandlers(io, socket);
 
-    // Disconnect handler
     socket.on('disconnect', () => {
       console.log(`❌ User disconnected: ${socket.user.username} (${socket.id})`);
     });
 
-    // Error handler
     socket.on('error', (error) => {
       console.error(`Socket error for user ${socket.user.username}:`, error);
     });
   });
 
-  // Log server events
   io.on('connect_error', (error) => {
     console.error('Socket.IO connection error:', error);
   });
@@ -56,9 +52,15 @@ function initializeSocket(server) {
   return io;
 }
 
-/**
- * Helper functions để emit events từ controller
- */
+// ✨ THÊM FUNCTION NÀY
+function getIO() {
+  if (!io) {
+    throw new Error('Socket.IO not initialized!');
+  }
+  return io;
+}
+
+// Helper functions
 function emitToRoom(io, room, event, data) {
   io.to(room).emit(event, data);
 }
@@ -75,8 +77,10 @@ function broadcastToAll(io, event, data) {
   io.emit(event, data);
 }
 
+// ✨ THÊM getIO VÀO EXPORT
 module.exports = {
   initializeSocket,
+  getIO,  // ← THÊM DÒNG NÀY
   emitToRoom,
   emitToUser,
   emitToAdmins,
