@@ -1,23 +1,26 @@
-// src/index.js
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import './index.css';
 import App from './App';
-import { SocketProvider } from './socket/SocketContext';
-import reportWebVitals from './reportWebVitals';
+import './index.css';
+
+// Socket Context Provider (if available)
+let SocketProvider = ({ children }) => children;
+
+try {
+  const { SocketProvider: SP } = require('./socket/SocketContext');
+  SocketProvider = SP;
+} catch (error) {
+  console.warn('SocketContext not available:', error.message);
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
-  // ❌ XÓA React.StrictMode - NÓ GÂY MOUNT 2 LẦN
-  // <React.StrictMode>
-    <BrowserRouter>
-      <SocketProvider>
-        <App />
-      </SocketProvider>
-    </BrowserRouter>
-  // </React.StrictMode>
+  // ✅ KHÔNG dùng React.StrictMode - nó gây mount 2 lần
+  <BrowserRouter>
+    <SocketProvider>
+      <App />
+    </SocketProvider>
+  </BrowserRouter>
 );
-
-reportWebVitals();

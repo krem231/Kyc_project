@@ -22,7 +22,10 @@ export const SocketProvider = ({ children }) => {
     console.log('🚀 [SocketProvider] Mounting...');
     
     const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    
     console.log('🔑 Token found:', !!token);
+    console.log('🔑 UserId found:', userId);
     
     if (!token) {
       console.log('⚠️ No token, skipping socket');
@@ -36,10 +39,10 @@ export const SocketProvider = ({ children }) => {
       transports: ['websocket'],
       reconnection: true,
       reconnectionAttempts: 5,
-      reconnectionDelay: 1000
+      reconnectionDelay: 1000,
+      forceNew: true
     });
 
-    // Connection events
     socketInstance.on('connect', () => {
       console.log('✅✅✅ SOCKET CONNECTED:', socketInstance.id);
       setIsConnected(true);
@@ -53,29 +56,26 @@ export const SocketProvider = ({ children }) => {
     socketInstance.on('connect_error', (error) => {
       console.error('❌ Connection error:', error.message);
       setIsConnected(false);
+      
+      if (error.message.includes('Invalid token')) {
+        console.error('🔴 Token invalid - user needs to login again');
+      }
     });
 
-    // ✨✨✨ NOTIFICATION EVENT - QUAN TRỌNG NHẤT
     socketInstance.on('new-notification', (data) => {
       console.log('\n');
-      console.log('═════════════════════════════════════════');
+      console.log('╔═══════════════════════════════════════╗');
       console.log('🔔 NOTIFICATION EVENT FIRED!');
-      console.log('═════════════════════════════════════════');
+      console.log('╚═══════════════════════════════════════╝');
       console.log('Data received:', data);
       console.log('Notification object:', data.notification);
       console.log('Title:', data.notification?.title);
       console.log('Message:', data.notification?.message);
       console.log('Amount:', data.notification?.amount);
       console.log('Type:', data.notification?.type);
-      console.log('═════════════════════════════════════════');
+      console.log('╚═══════════════════════════════════════╝');
       console.log('\n');
       
-      // ALERT - ĐỂ TEST
-      const title = data.notification?.title || 'No title';
-      const message = data.notification?.message || 'No message';
-      alert(`🔔 THÔNG BÁO MỚI!\n\n${title}\n\n${message}`);
-      
-      // Update state
       setNotifications(prevNotifs => {
         const newNotifs = [data.notification, ...prevNotifs];
         console.log('📝 Notifications updated. New count:', newNotifs.length);
@@ -83,7 +83,6 @@ export const SocketProvider = ({ children }) => {
         return newNotifs;
       });
       
-      // Dispatch custom event
       try {
         window.dispatchEvent(new CustomEvent('new-notification', { 
           detail: data.notification 
@@ -94,7 +93,6 @@ export const SocketProvider = ({ children }) => {
       }
     });
 
-    // Balance update event
     socketInstance.on('balance-updated', (data) => {
       console.log('💰 Balance updated:', data);
       setBalance(data.balance);
@@ -103,7 +101,6 @@ export const SocketProvider = ({ children }) => {
     setSocket(socketInstance);
     console.log('✅ Socket instance saved to state');
 
-    // Cleanup function
     return () => {
       console.log('🧹 Cleaning up socket...');
       if (socketInstance) {
@@ -112,7 +109,7 @@ export const SocketProvider = ({ children }) => {
         socketInstance.disconnect();
       }
     };
-  }, []); // Empty deps - run once
+  }, []);
 
   const value = {
     socket,

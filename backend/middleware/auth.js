@@ -1,30 +1,65 @@
-// middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    // Lấy token từ header
+    const authHeader = req.headers.authorization;
+    
+    console.log('=== AUTH MIDDLEWARE DEBUG ===');
+    console.log('Authorization header:', authHeader ? 'Present' : 'Missing');
+
+    if (!authHeader) {
+      console.log('No authorization header');
+      return res.status(401).json({ 
+        success: false,
+        message: 'Vui lòng đăng nhập' 
+      });
+    }
+
+    // Extract token (format: "Bearer <token>")
+    const token = authHeader.split(' ')[1];
+    
     if (!token) {
-      return res.status(401).json({ message: 'Vui lòng đăng nhập' });
+      console.log('Token not found in header');
+      return res.status(401).json({ 
+        success: false,
+        message: 'Token không hợp lệ' 
+      });
     }
 
-    let decoded;
+    console.log('Token:', token.substring(0, 20) + '...');
 
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
-    } catch (e) {
-      decoded = jwt.verify(token, 'WALLET_SECRET_KEY');
-    }
+    // Verify token
+    const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    console.log('Token verified, user:', decoded);
 
-    req.user = {
-       id: decoded.id || decoded.userId,
-      username: decoded.username,
-      role: decoded.role
-    };
-
+    // Attach user info to request
+    req.user = decoded;
+    
     next();
-  } catch (err) {
-    return res.status(401).json({ message: 'Token không hợp lệ' });
+  } catch (error) {
+    console.error('Auth error:', error.message);
+    
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Token không hợp lệ' 
+      });
+    }
+    
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ 
+        success: false,
+        message: 'Token expired' 
+      });
+    }
+    
+    return res.status(401).json({ 
+      success: false,
+      message: 'Authentication error' 
+    });
   }
 };
 

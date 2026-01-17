@@ -6,7 +6,7 @@ import './Notification/NotificationBell.css';
 
 const NotificationBell = ({ onOpen }) => {
   const [unreadCount, setUnreadCount] = useState(0);
-  const { notifications } = useSocketContext();
+  const { notifications, isConnected } = useSocketContext();
 
   useEffect(() => {
     fetchUnreadCount();
@@ -15,13 +15,14 @@ const NotificationBell = ({ onOpen }) => {
   useEffect(() => {
     console.log('🔔 Bell - notifications changed:', notifications.length);
     if (notifications.length > 0) {
-      setUnreadCount(prev => prev + 1);
+      fetchUnreadCount();
     }
   }, [notifications]);
 
   const fetchUnreadCount = async () => {
     try {
       const response = await notificationAPI.getUnreadCount();
+      console.log('📊 Unread count fetched:', response.data.unreadCount);
       setUnreadCount(response.data.unreadCount);
     } catch (error) {
       console.error('Error fetching unread count:', error);

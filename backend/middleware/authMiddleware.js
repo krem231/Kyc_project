@@ -1,51 +1,57 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 const JWT_SECRETS = [
-  'WALLET_SECRET_KEY',
-  'secretkey'
+  'WALLET_SECRET_KEY', // token má»›i (deploy)
+  'secretkey'          // token cÅ© (báº£n khung)
 ];
 
-function verifyWithMultipleSecrets(token) {
+function verifyToken(token) {
   for (const secret of JWT_SECRETS) {
     try {
       return jwt.verify(token, secret);
-    } catch (e) {}
+    } catch (err) {
+      // ignore, thá»­ secret tiáº¿p theo
+    }
   }
   return null;
 }
 
-module.exports = function authMiddleware(req, res, next) {
+async function socketAuth(socket, next) {
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.replace('Bearer ', '');
+    const token =
+      socket.handshake.auth?.token ||
+      socket.handshake.query?.token;
 
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Vui lòng đăng nhập'
-      });
+      return next(new Error('Authentication error: Token not provided'));
     }
 
-    const decoded = verifyWithMultipleSecrets(token);
-
-    if (!decoded) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token không hợp lệ'
-      });
+    const decoded = verifyToken(token);
+    if (!decoded || !decoded.id) {
+      return next(new Error('Authentication error: Invalid token'));
     }
 
-    req.user = {
-      id: decoded.id || decoded.userId,
-      username: decoded.username,
-      role: decoded.role
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return next(new Error('Authentication error: User not found'));
+    }
+
+    socket.user = {
+      id: user._id,
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      phone: user.phone
     };
 
+    console.log(`ðŸ” Socket authenticated: ${user.username} (${user.role})`);
     next();
-  } catch (err) {
-    return res.status(401).json({
-      success: false,
-      message: 'Token không hợp lệ'
-    });
+  } catch (error) {
+    console.error('Socket authentication error:', error.message);
+    return next(new Error('Authentication error'));
   }
-};
+}
+
+module.exports = socketAuth;

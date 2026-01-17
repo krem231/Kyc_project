@@ -1,6 +1,5 @@
-// src/App.js
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useSocketContext } from './socket/SocketContext';
 import './App.css';
 
@@ -13,6 +12,8 @@ import ChatWidget from './components/ChatWidget';
 // Pages
 import Register from './components/pages/users/Register';
 import Login from './components/pages/users/Login';
+import VerifyOTP from './components/pages/users/VerifyOTP';
+
 import Welcome from './components/Welcome';
 import Choose from './components/pages/admin/Choose';
 import LinkBank from './components/pages/users/LinkBank';
@@ -22,29 +23,26 @@ import Admin from './components/pages/admin/Admin';
 import TransactionHistory from './components/pages/users/TransactionHistory';
 
 function App() {
-  console.log('🔄 [App] Component rendering...');
+  console.log('📄 [App] Component rendering...');
   
   const location = useLocation();
   const currentPath = location.pathname;
 
-  // Get socket context
   const { isConnected, notifications, balance } = useSocketContext();
   
-  console.log('📊 [App] Socket connected:', isConnected);
-  console.log('📊 [App] Notifications count:', notifications.length);
-  console.log('📊 [App] Balance:', balance);
+  console.log('📡 [App] Socket connected:', isConnected);
+  console.log('📡 [App] Notifications count:', notifications.length);
+  console.log('📡 [App] Balance:', balance);
   
-  // Local states
   const [showNotificationPanel, setShowNotificationPanel] = useState(false);
   const [toastNotification, setToastNotification] = useState(null);
 
-  // ✨ Watch notifications changes
   useEffect(() => {
-    console.log('\n═══════════════════════════════════════');
+    console.log('\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓');
     console.log('🎯 [App useEffect] Triggered!');
     console.log('Notifications array:', notifications);
     console.log('Notifications length:', notifications.length);
-    console.log('═══════════════════════════════════════\n');
+    console.log('┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n');
     
     if (notifications.length > 0) {
       const latest = notifications[0];
@@ -52,7 +50,6 @@ function App() {
       
       setToastNotification(latest);
       
-      // Auto-hide after 6 seconds
       const timer = setTimeout(() => {
         console.log('⏰ [App] Auto-hiding toast');
         setToastNotification(null);
@@ -65,16 +62,14 @@ function App() {
     }
   }, [notifications]);
 
-  // Layout logic
-  const publicPaths = ['/login', '/register', '/choose', '/admin', '/'];
+  const publicPaths = ['/login', '/register', '/verify-otp', '/choose', '/admin', '/'];
   const showMainLayout = !publicPaths.includes(currentPath);
 
-  console.log('🔍 [App] Current toast notification:', toastNotification);
-  console.log('🔍 [App] Should show toast:', !!toastNotification);
+  console.log('🔌 [App] Current toast notification:', toastNotification);
+  console.log('🔌 [App] Should show toast:', !!toastNotification);
 
   return (
     <div className="app">
-      {/* Header */}
       {showMainLayout && (
         <header className="app-header">
           <h1>My Wallet App</h1>
@@ -94,12 +89,12 @@ function App() {
         </header>
       )}
 
-      {/* Main Routes */}
       <main className={showMainLayout ? 'app-content' : ''}>
         <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Login />} />
+          <Route path="/verify-otp" element={<VerifyOTP />} />
           <Route path="/welcome" element={<Welcome />} />
           <Route path="/choose" element={<Choose />} />
           <Route path="/admin" element={<Admin />} />
@@ -110,7 +105,6 @@ function App() {
         </Routes>
       </main>
 
-      {/* Overlays */}
       {showMainLayout && <ChatWidget />}
       
       <NotificationList
@@ -118,10 +112,9 @@ function App() {
         onClose={() => setShowNotificationPanel(false)}
       />
       
-      {/* TOAST - ALWAYS RENDER OUTSIDE LAYOUT CHECK */}
       {toastNotification ? (
         <>
-          {console.log('🍞 [App] Rendering NotificationToast component')}
+          {console.log('🎨 [App] Rendering NotificationToast component')}
           <NotificationToast
             notification={toastNotification}
             onClose={() => {
