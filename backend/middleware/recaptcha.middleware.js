@@ -1,10 +1,7 @@
 const axios = require('axios');
 
 /**
- * Middleware xác thực reCAPTCHA v3
- * - Lấy recaptchaToken từ request body
- * - Gửi đến Google API để verify
- * - Nếu verify thành công, cho phép request tiếp tục
+ * Middleware xác thực reCAPTCHA v2
  */
 const verifyRecaptcha = async (req, res, next) => {
   const { recaptchaToken } = req.body;
@@ -27,6 +24,8 @@ const verifyRecaptcha = async (req, res, next) => {
         }
       }
     );
+
+    console.log('reCAPTCHA verification result:', response.data);
 
     if (!response.data.success) {
       return res.status(400).json({ 

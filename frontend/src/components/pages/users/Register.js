@@ -54,7 +54,7 @@ function Register() {
     setLoading(true);
     try {
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/register`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/register`,
         {
           ...data,
           recaptchaToken
@@ -120,7 +120,7 @@ function Register() {
         <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
           <ReCAPTCHA
             ref={recaptchaRef}
-            sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+            sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
             onChange={onRecaptchaChange}
           />
         </div>

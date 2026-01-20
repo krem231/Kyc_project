@@ -33,14 +33,13 @@ function Login() {
     setLoading(true);
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/login`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'}/api/login`,
         {
           ...data,
           recaptchaToken
         }
       );
       
-      // Nếu yêu cầu OTP
       if (res.data.requireOTP) {
         navigate('/verify-otp', {
           state: {
@@ -49,7 +48,6 @@ function Login() {
           }
         });
       } else {
-        // Trường hợp không cần OTP (nếu có)
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('username', res.data.username);
         localStorage.setItem('role', res.data.role);
